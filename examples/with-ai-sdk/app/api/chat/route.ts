@@ -1,6 +1,6 @@
 import { createOpenAI } from "@ai-sdk/openai"; // 导入 createOpenAI
 import { frontendTools } from "@assistant-ui/react-ai-sdk";
-import { streamText, experimental_streamText } from "ai"; // experimental_streamText 可能提供更多灵活性，但 streamText 也可以
+import { streamText } from "ai";
 import { z } from "zod";
 
 export const runtime = "edge";
