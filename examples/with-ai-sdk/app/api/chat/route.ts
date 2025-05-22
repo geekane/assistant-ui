@@ -35,17 +35,17 @@ export async function POST(req: Request) {
 
     // 准备 streamText 函数的选项
     const streamTextOptions: {
-      model: any; // 根据 modelscopeProvider(modelId) 的实际返回类型调整，通常是 LanguageModelV1
-      messages: any; // 应为 CoreMessage[]
+      model: any; // 建议使用从 'ai' 或 '@ai-sdk/provider' 导入的 LanguageModelV1 类型
+      messages: import('ai').CoreMessage[]; // 明确 messages 的类型
       system?: string;
-      tools?: Record<string, import('ai').CoreTool>; // 明确 tools 的类型
-      toolChoice?: 'auto' | 'none' | 'required' | { type: 'tool'; name: string }; // 根据需要添加
-      // toolCallStreaming?: boolean; // 根据需要和兼容性添加
+      tools?: Record<string, import('ai').CoreTool>;
+      toolChoice?: 'auto' | 'none' | 'required' | { type: 'tool'; toolName: string }; // <<< 已更正：name -> toolName
+      // toolCallStreaming?: boolean;
       // 其他 streamText 支持的参数...
     } = {
       model: modelscopeProvider(modelId),
-      messages,
-      system,
+      messages, // 确保 messages 是 CoreMessage[] 类型
+      // system 和 tools 会在下面条件性地添加到这个对象上
     };
 
     // 只有当有有效的工具时，才添加 tools 属性到选项中
