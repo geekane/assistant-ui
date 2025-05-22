@@ -8,27 +8,14 @@ export const maxDuration = 30;
 
 // --- ModelScope 配置 ---
 // 1. 定义您的 API 密钥和 Base URL
-// 强烈建议使用环境变量存储敏感信息
-const MODELSCOPE_API_KEY = process.env['MODELSCOPE_API_KEY'];
-const MODELSCOPE_BASE_URL = process.env['MODELSCOPE_BASE_URL'];
+const MODELSCOPE_API_KEY = process.env['MODELSCOPE_API_KEY'] || "YOUR_MODELSCOPE_API_KEY_FALLBACK_STRING";
+const MODELSCOPE_BASE_URL = process.env['MODELSCOPE_BASE_URL'] || "https://api-inference.modelscope.cn/v1/"; // 如果这是确定的URL，可以作为后备
 
 // 2. 为 ModelScope 创建一个自定义的 OpenAI provider 实例
 const modelscopeProvider = createOpenAI({
-  apiKey: MODELSCOPE_API_KEY,
-  baseURL: MODELSCOPE_BASE_URL,
-  // 如果 ModelScope 需要自定义请求头，您可能需要在这里添加。
-  // 您的 Python 示例中没有显示需要额外的请求头。
-  // headers: { 'Custom-Header': 'value' },
-
-  // Vercel AI SDK 的 createOpenAI 通常会自动添加 "Authorization: Bearer <token>" 请求头。
-  // 如果 ModelScope 期望 API 密钥以不同的方式传递（例如在不同的请求头中），
-  // 则可能需要更高级的自定义，例如通过 `compatibility: 'manual'` 并自己处理 fetch 请求。
-  // 但从您的 Python 示例来看，它使用了标准的 OpenAI Python 客户端，
-  // 这通常意味着标准的 Bearer token 认证方式是兼容的。
-});
-
-// --- ModelScope 配置结束 ---
-
+  apiKey: MODELSCOPE_API_KEY, // 现在确保是 string 类型
+  baseURL: MODELSCOPE_BASE_URL, // 现在确保是 string 类型
+  
 export async function POST(req: Request) {
   const { messages, system, tools } = await req.json();
 
