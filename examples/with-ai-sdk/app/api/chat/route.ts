@@ -29,42 +29,55 @@ const modelscopeProvider = createOpenAI({
 
 export async function POST(req: Request) {
   try {
-    const { messages, system, tools } = await req.json();
+    const { messages, system, tools: clientToolsPayload } = await req.json(); // 从请求中获取原始的 tools
 
-    // 3. 指定 ModelScope 的模型 ID
-    const modelId = "deepseek-ai/DeepSeek-R1"; // 或者您想使用的其他 ModelScope 模型 ID
+    const modelId = "deepseek-ai/DeepSeek-R1";
 
-    // 4. 使用 streamText 进行调用，传入自定义的 provider 和模型 ID
-    const result = await streamText({
+    // 准备 streamText 函数的选项
+    const streamTextOptions: {
+      model: any; // 根据 modelscopeProvider(modelId) 的实际返回类型调整，通常是 LanguageModelV1
+      messages: any; // 应为 CoreMessage[]
+      system?: string;
+      tools?: Record<string, import('ai').CoreTool>; // 明确 tools 的类型
+      toolChoice?: 'auto' | 'none' | 'required' | { type: 'tool'; name: string }; // 根据需要添加
+      // toolCallStreaming?: boolean; // 根据需要和兼容性添加
+      // 其他 streamText 支持的参数...
+    } = {
       model: modelscopeProvider(modelId),
       messages,
-      // 根据 ModelScope 是否支持以及如何支持工具调用流来决定是否启用或调整 tools 部分
-      // toolCallStreaming: true, // 如果 ModelScope 不支持或格式不同，可能需要注释或修改
       system,
-      tools: tools ? { // 确保 tools 不为 undefined 才展开
-        ...frontendTools(tools), // 这个函数转换的工具格式需要与 ModelScope 兼容
-        // 示例工具，请根据实际需求调整或移除
+    };
+
+    // 只有当有有效的工具时，才添加 tools 属性到选项中
+    if (clientToolsPayload) {
+      const actualTools: Record<string, import('ai').CoreTool> = {
+        ...frontendTools(clientToolsPayload), // 确保 frontendTools 返回的结构是 Record<string, CoreTool>
+        // 您定义的 weather 工具
         weather: {
           description: "Get weather information",
           parameters: z.object({
             location: z.string().describe("Location to get weather for"),
           }),
-          execute: async ({ location }: { location:string }) => {
-            // 这是一个模拟的工具执行，实际应调用天气 API
+          execute: async ({ location }: { location: string }) => {
             return `The weather in ${location} is sunny.`;
           },
         },
-      } : undefined,
-      // 如果需要，可以添加其他参数，如 temperature, max_tokens 等
-      // temperature: 0.7,
-      // maxTokens: 1024,
-    });
+      };
+
+      // 确保 actualTools 不是空对象才赋值
+      if (Object.keys(actualTools).length > 0) {
+        streamTextOptions.tools = actualTools;
+        // 如果需要，在这里一同设置 toolChoice 或 toolCallStreaming
+        // streamTextOptions.toolCallStreaming = true;
+      }
+    }
+
+    const result = await streamText(streamTextOptions);
 
     return result.toDataStreamResponse();
 
   } catch (error) {
     console.error("[API CHAT ERROR]", error);
-    // 返回一个标准的错误响应
     if (error instanceof Error) {
       return new Response(JSON.stringify({ error: error.message }), {
         status: 500,
