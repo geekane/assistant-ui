@@ -9,8 +9,8 @@ export const maxDuration = 30;
 // --- ModelScope 配置 ---
 // 1. 定义您的 API 密钥和 Base URL
 // 强烈建议使用环境变量存储敏感信息
-const MODELSCOPE_API_KEY = process.env['MODELSCOPE_API_KEY']
-const MODELSCOPE_BASE_URL = process.env['MODELSCOPE_BASE_URL']
+const MODELSCOPE_API_KEY = process.env['MODELSCOPE_API_KEY'];
+const MODELSCOPE_BASE_URL = process.env['MODELSCOPE_BASE_URL'];
 
 // 2. 为 ModelScope 创建一个自定义的 OpenAI provider 实例
 const modelscopeProvider = createOpenAI({
