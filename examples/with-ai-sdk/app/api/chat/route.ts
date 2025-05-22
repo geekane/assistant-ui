@@ -5,7 +5,6 @@ import {
   type CoreTool,
   type CoreMessage,
   type LanguageModelV1, // Vercel AI SDK 的模型类型
-  type ToolChoice, // Vercel AI SDK 的 ToolChoice 类型
 } from "ai";
 import { z } from "zod";
 
